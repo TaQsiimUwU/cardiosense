@@ -54,7 +54,7 @@ fun NavGraph(modifier: Modifier = Modifier) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             when (selectedScreen) {
                 AppScreen.Permissions -> PermissionsScreen(
-                    onPermissionsGranted = { var hasPermissions = true }
+                    onPermissionsGranted = { selectedScreen = AppScreen.Scanner }
                 )
                 AppScreen.Scanner -> ScannerScreen()
                 AppScreen.Home -> HomeScreen()

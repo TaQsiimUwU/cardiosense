@@ -30,34 +30,32 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cardiosense.ui.theme.CardiosenseTheme
 import com.example.cardiosense.ui.theme.cardioSenseColors
 import kotlin.math.max
 
-private data class DeviceItem(
-    val name: String,
-    val rssi: Int
-)
-
 @Composable
-fun ScannerScreen() {
-    val devices = remember {
-        listOf(
-            DeviceItem("CardioSense Device #123", -48),
-            DeviceItem("CardioSense Device #214", -62),
-            DeviceItem("CardioSense Device #351", -78)
-        )
+fun ScannerScreen(
+    viewModel: ScannerViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopScanning()
+        }
     }
 
     Column(
@@ -69,24 +67,40 @@ fun ScannerScreen() {
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold
         )
-        Text(
-            text = "UUID: 0x180D",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+
+        RadarAnimation(
+            modifier = Modifier.fillMaxWidth().height(200.dp),
+            isScanning = uiState.isScanning
         )
 
-        RadarAnimation(modifier = Modifier.fillMaxWidth().height(200.dp))
+        if (uiState.error != null) {
+            Text(
+                text = uiState.error ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(devices) { device ->
-                DeviceRow(device = device)
+        if (uiState.devices.isEmpty()) {
+            Text(
+                text = if (uiState.isScanning) "Searching for CardioSense devices..." else "No devices found",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        } else {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(uiState.devices) { device ->
+                    DeviceRow(device = device)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun RadarAnimation(modifier: Modifier = Modifier) {
+private fun RadarAnimation(modifier: Modifier = Modifier, isScanning: Boolean = true) {
     val infiniteTransition = rememberInfiniteTransition(label = "radar")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 0.8f,
@@ -107,15 +121,23 @@ private fun RadarAnimation(modifier: Modifier = Modifier) {
         label = "pulseAlpha"
     )
 
+    val scannerCenterColor = MaterialTheme.cardioSenseColors.scannerCenter
+
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.size(200.dp)) {
-            val radius = size.minDimension / 2
-
+            if (isScanning) {
+                drawCircle(
+                    color = scannerCenterColor,
+                    radius = 80.dp.toPx() * pulseScale,
+                    alpha = pulseAlpha,
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
         }
         Box(
             modifier = Modifier
                 .size(64.dp)
-                .background(MaterialTheme.cardioSenseColors.scannerCenter, CircleShape),
+                .background(scannerCenterColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -136,6 +158,12 @@ private fun DeviceRow(device: DeviceItem) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = device.name, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = device.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SignalStrengthBars(rssi = device.rssi)

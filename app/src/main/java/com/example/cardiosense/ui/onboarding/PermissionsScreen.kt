@@ -86,6 +86,9 @@ fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissionsMap ->
         permissionsGranted = permissionsMap.values.all { it }
+        if (permissionsGranted) {
+            onPermissionsGranted()
+        }
     }
 
     val bluetoothGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -130,6 +133,12 @@ fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
             Text(text = if (permissionsGranted) "All Permissions Granted" else "Grant Permissions")
         }
 
+        if (permissionsGranted) {
+            LaunchedEffect(Unit) {
+                onPermissionsGranted()
+            }
+        }
+
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -139,11 +148,6 @@ fun PermissionsScreen(onPermissionsGranted: () -> Unit) {
                 PermissionStatusRow("Location", Icons.Default.LocationOn, locationGranted)
                 PermissionStatusRow("Notifications", Icons.Default.Notifications, notificationGranted)
             }
-        }
-
-        if (permissionsGranted)
-        {
-
         }
     }
 }
