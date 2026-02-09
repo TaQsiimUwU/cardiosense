@@ -1,5 +1,10 @@
+package com.example.cardiosense.ui.onboarding
+
 import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.content.ContextCompat
 
 object PermissionManager {
     fun getRequiredPermissions(): Array<String> {
@@ -23,4 +28,11 @@ object PermissionManager {
 
         return permissions.toTypedArray()
     }
+
+     fun hasAllPermissions(context: Context): Boolean {
+        return getRequiredPermissions().all { permission ->
+            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
 }

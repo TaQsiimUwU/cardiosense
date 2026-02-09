@@ -54,7 +54,6 @@ fun HomeScreen() {
         ConnectionStatusBar()
         EcgWaveformCard()
         VitalsRow()
-        SosButton()
     }
 }
 
@@ -224,19 +223,7 @@ private fun androidx.compose.foundation.layout.RowScope.AiInsightCompactCard(sta
     }
 }
 
-@Composable
-private fun SosButton() {
-    Button(
-        onClick = { },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.cardioSenseColors.errorRed,
-            contentColor = MaterialTheme.colorScheme.onError
-        )
-    ) {
-        Text(text = "Send SOS Alert", style = MaterialTheme.typography.titleMedium)
-    }
-}
+
 
 @Preview(showBackground = true)
 @Composable

@@ -7,42 +7,32 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.cardiosense.ui.theme.CardiosenseTheme
 import com.example.cardiosense.ui.navigation.NavGraph
-import com.example.cardiosense.ui.onboarding.PermissionsScreen
+import com.example.cardiosense.ui.navigation.AppScreen
+import com.example.cardiosense.ui.onboarding.PermissionManager
+import com.example.cardiosense.ui.theme.CardiosenseTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            var hasPermissions by remember { mutableStateOf(false) }
 
-            if (hasPermissions){
+        val startScreen = if (PermissionManager.hasAllPermissions(this)) {
+            AppScreen.Home
+        } else {
+            AppScreen.Permissions
+        }
+
+        setContent {
             CardiosenseTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavGraph(modifier = Modifier.fillMaxSize().padding(innerPadding))
+                    NavGraph(
+                        modifier = Modifier.padding(innerPadding),
+                        startDestination = startScreen
+                    )
                 }
             }
-            }
-            else {
-                PermissionsScreen(
-                    onPermissionsGranted = {hasPermissions = true }
-                )
-            }
         }
-    }
-}
-
-@Composable
-fun AppPreview() {
-    CardiosenseTheme {
-        NavGraph(modifier = Modifier.fillMaxSize())
     }
 }
