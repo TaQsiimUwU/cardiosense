@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.taqsiim.cardiosense"
+    namespace = "com.taqsiim.cardiologic"
     compileSdk {
         version = release(36)
     }
@@ -12,7 +12,7 @@ android {
         noCompress += "tflite"
     }
     defaultConfig {
-        applicationId = "com.taqsiim.cardiosense"
+        applicationId = "com.taqsiim.cardiologic"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
