@@ -4,13 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.cardiosense"
+    namespace = "com.taqsiim.cardiosense"
     compileSdk {
         version = release(36)
     }
-
+    androidResources {
+        noCompress += "tflite"
+    }
     defaultConfig {
-        applicationId = "com.example.cardiosense"
+        applicationId = "com.taqsiim.cardiosense"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -60,5 +62,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
+    implementation("org.tensorflow:tensorflow-lite:2.17.0")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.17.0")
+//    implementation("org.tensorflow:tensorflow-lite-support:0.5.0")
 }
